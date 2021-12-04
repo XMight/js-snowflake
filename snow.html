@@ -3,53 +3,19 @@
 
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <TITLE>Snowing animation inside a website</TITLE>
-  <STYLE type="text/css">
-    :root {
-      --snowflake-color: #000000;
-    }
+  <TITLE>Snowflakes playground</TITLE>
+</head>
 
-    body {
-      background-color: grey;
-    }
+<body>
+  <div><button class="snowflakesToggle">Where is snow?</button></div>
+  <div class="snowflakes" aria-hidden="true"></div>
 
-    .snowflake {
-      color: var(--snowflake-color);
-      text-shadow: 0 0 10px #000;
-      position: fixed;
-      top: 0%;
-      z-index: 9999;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      cursor: help;
-    }
-  </style>
-</HEAD>
-
-<BODY>
-  <div class="snowflakes" aria-hidden="true">
-
-  </div>
   <script type='text/javascript'>
     //<![CDATA[
-    let startSnowflakeCode = 10052;
-    var globalID;
-    var startTime = 0;
-    var snowflakeCount = 25;
-    var elapsedMillis = 0;
-    var fps = 40;
-    var frameDeltaMillis = 1000 / fps;
-    var lastSimulationTime = 0;
-    var simulationTime = frameDeltaMillis;
-    var lightsSimulationStartMillis = 0;
-    var colorHasRun = {};
-
-    var r = document.querySelector(':root');
+    let ctx = {};
 
     function componentToHex(c) {
-      var hex = c.toString(16);
+      let hex = c.toString(16);
       return hex.length == 1 ? "0" + hex : hex;
     }
 
@@ -58,29 +24,29 @@
     }
 
     function updateCurrentSimulationTime() {
-      simulationTime = performance.now();
+      ctx.simulationTime = performance.now();
     }
 
     function updateElapsed() {
       let endTime = performance.now();
-      let elapsedMillis = endTime - startTime;
+      ctx.elapsedMillis = endTime - ctx.startTime;
     }
 
     /**
- * @param {String} HTML representing a single element
- * @return {Element}
- */
+     * @param {String} HTML representing a single element
+     * @return {Element}
+     **/
     function htmlToElement(html) {
-      var template = document.createElement('template');
+      let template = document.createElement('template');
       html = html.trim(); // Never return a text node of whitespace as the result
       template.innerHTML = html;
       return template.content.firstChild;
     }
 
-    function simulateChristmasTreeLights(snowflakes, frameDeltaMillis) {
+    function simulateChristmasTreeLights(snowflakes) {
       let currentMillis = performance.now();
-      if (currentMillis - lightsSimulationStartMillis < 1000) {
-        if (colorHasRun['1000'] === false) {
+      if (currentMillis - ctx.lightsSimulationStartMillis < 1000) {
+        if (ctx.colorHasRun['1000'] === false) {
           for (let i = 0; i < snowflakes.length; i++) {
             let snowflake = snowflakes[i];
             if (i % 2 == 0) {
@@ -90,10 +56,10 @@
             }
           }
 
-          colorHasRun['1000'] = true;
+          ctx.colorHasRun['1000'] = true;
         }
-      } else if (currentMillis - lightsSimulationStartMillis < 2000) {
-        if (colorHasRun['2000'] == false) {
+      } else if (currentMillis - ctx.lightsSimulationStartMillis < 2000) {
+        if (ctx.colorHasRun['2000'] == false) {
           for (let i = 0; i < snowflakes.length; i++) {
             let snowflake = snowflakes[i];
 
@@ -104,12 +70,12 @@
             }
           }
 
-          colorHasRun['2000'] = true;
+          ctx.colorHasRun['2000'] = true;
         }
       } else {
-        lightsSimulationStartMillis = currentMillis;
-        colorHasRun['1000'] = false;
-        colorHasRun['2000'] = false;
+        ctx.lightsSimulationStartMillis = currentMillis;
+        ctx.colorHasRun['1000'] = false;
+        ctx.colorHasRun['2000'] = false;
       }
       //console.log('i: ' + i + '; currentLightsSimulationState: ' + currentLightsSimulationState
       //  + '; lightsSimulationElapsedTime: ' + lightsSimulationElapsedTime + '; snoflake: ' + snowflake.style['color']);
@@ -152,22 +118,23 @@
     function runSnow() {
       updateElapsed();
 
-      if (simulationTime - lastSimulationTime >= frameDeltaMillis) {
+      if (ctx.simulationTime - ctx.lastSimulationTime
+        >= ctx.frameDeltaMillis) {
         let snowflakes = document.getElementsByClassName('snowflake');
 
-        simulateChristmasTreeLights(snowflakes, frameDeltaMillis);
+        simulateChristmasTreeLights(snowflakes);
         changeSnowflakesPositions(snowflakes);
 
-        lastSimulationTime = simulationTime;
+        ctx.lastSimulationTime = ctx.simulationTime;
       }
 
       updateCurrentSimulationTime();
 
-      globalID = requestAnimationFrame(runSnow);
+      ctx.globalID = requestAnimationFrame(runSnow);
     }
 
     function getNextSnowflakeCode(i) {
-      return '&#x' + (startSnowflakeCode + (i % 8)).toString(16) + ';';
+      return '&#x' + (ctx.startSnowflakeCode + (i % 8)).toString(16) + ';';
     }
 
     function addNewSnowflake(container, snowflakeCode, leftPosition) {
@@ -179,20 +146,52 @@
       container.appendChild(sf);
     }
 
-    function createSnowflakes() {
-      let snowflakesContainer = document.getElementsByClassName('snowflakes')[0];
-      let step = window.innerWidth / snowflakeCount;
-      for (let i = 0; i < snowflakeCount; i++) {
-        addNewSnowflake(snowflakesContainer, getNextSnowflakeCode(i), (1 + i * step));
-      }
-
-      colorHasRun['1000'] = false;
-      colorHasRun['2000'] = false;
+    function initSnowflakesStyle() {
+      let snowflakeStyle = document.createElement('style');
+      snowflakeStyle.innerHTML = ':root{--snowflake-color:#000000;}.snowflake{color:var(--snowflake-color);text-shadow:0 0 5px#000;position:fixed;top:0%;z-index:9999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;cursor:normal;}';
+      document.head.appendChild(snowflakeStyle);
     }
 
-    createSnowflakes();
+    function generateSnowflakes(snowflakesContainer) {
+      let step = window.innerWidth / ctx.snowflakeCount;
+      for (let i = 0; i < ctx.snowflakeCount; i++) {
+        addNewSnowflake(snowflakesContainer, getNextSnowflakeCode(i), (1 + i * step));
+      }
+    }
 
-    globalID = requestAnimationFrame(runSnow);
+    function resetSimulationState() {
+      ctx.colorHasRun['1000'] = false;
+      ctx.colorHasRun['2000'] = false;
+    }
+
+    function initSnowflakesParameters() {
+      ctx.startSnowflakeCode = 10052;
+      ctx.globalID = 0;
+      ctx.startTime = 0;
+      ctx.snowflakeCount = 25;
+      ctx.elapsedMillis = 0;
+      ctx.fps = 40;
+      ctx.frameDeltaMillis = 1000 / ctx.fps;
+      ctx.lastSimulationTime = 0;
+      ctx.simulationTime = ctx.frameDeltaMillis;
+      ctx.lightsSimulationStartMillis = 0;
+      ctx.colorHasRun = {};
+    }
+
+    function initSnowflakes(snowflakesContainer) {
+      initSnowflakesParameters();
+      initSnowflakesStyle();
+      generateSnowflakes(snowflakesContainer);
+      resetSimulationState();
+    }
+
+    function runSnowflakesAnimation() {
+      ctx.globalID = requestAnimationFrame(runSnow);
+    }
+
+    initSnowflakes(document.getElementsByClassName('snowflakes')[0]);
+
+    runSnowflakesAnimation();
 //]]>
   </script>
 </BODY>
