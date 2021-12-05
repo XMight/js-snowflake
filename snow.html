@@ -2,198 +2,198 @@
 <html lang="en">
 
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <TITLE>Snowflakes playground</TITLE>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Snowflakes playground</title>
 </head>
 
 <body>
-  <div><button class="snowflakesToggle">Where is snow?</button></div>
-  <div class="snowflakes" aria-hidden="true"></div>
+    <div><button class="snowflakesToggle">Where is snow?</button></div>
+    <div class="snowflakes" aria-hidden="true"></div>
+    <script type='text/javascript'>
+        //<![CDATA[
+        function SnowflakesEngine(snowflakesContainer, snowflakesCount, fps) {
+            let _this = this;
 
-  <script type='text/javascript'>
-    //<![CDATA[
+            this.snowflakesContainer = snowflakesContainer;
+            this.ctx = {};
+            this.ctx.snowflakesCount = snowflakesCount;
+            this.ctx.fps = fps;
 
-    function SnowflakesEngine() {
-      let _this = this;
-      this.ctx = {};
+            this.componentToHex = function (c) {
+                let hex = c.toString(16);
+                return hex.length == 1 ? "0" + hex : hex;
+            };
 
-      this.componentToHex = function (c) {
-        let hex = c.toString(16);
-        return hex.length == 1 ? "0" + hex : hex;
-      };
-
-      this.rgbToHex = function (r, g, b) {
-        return "#" + _this.componentToHex(r) + _this.componentToHex(g) + _this.componentToHex(b);
-      }
-
-      this.updateCurrentSimulationTime = function () {
-        _this.ctx.simulationTime = performance.now();
-      }
-
-      this.updateElapsed = function () {
-        let endTime = performance.now();
-        _this.ctx.elapsedMillis = endTime - _this.ctx.startTime;
-      }
-
-      /**
-      * @param {String} HTML representing a single element
-      * @return {Element}
-      **/
-      this.htmlToElement = function (html) {
-        let template = document.createElement('template');
-        html = html.trim(); // Never return a text node of whitespace as the result
-        template.innerHTML = html;
-        return template.content.firstChild;
-      }
-
-      this.simulateChristmasTreeLights = function (snowflakes) {
-        let currentMillis = performance.now();
-        if (currentMillis - _this.ctx.lightsSimulationStartMillis < 1000) {
-          if (_this.ctx.colorHasRun['1000'] === false) {
-            for (let i = 0; i < snowflakes.length; i++) {
-              let snowflake = snowflakes[i];
-              if (i % 2 == 0) {
-                snowflake.style['color'] = _this.rgbToHex(255, 0, 0);
-              } else {
-                snowflake.style['color'] = _this.rgbToHex(0, 255, 0);
-              }
+            this.rgbToHex = function (r, g, b) {
+                return "#" + _this.componentToHex(r) + _this.componentToHex(g) + _this.componentToHex(b);
             }
 
-            _this.ctx.colorHasRun['1000'] = true;
-          }
-        } else if (currentMillis - _this.ctx.lightsSimulationStartMillis < 2000) {
-          if (_this.ctx.colorHasRun['2000'] == false) {
-            for (let i = 0; i < snowflakes.length; i++) {
-              let snowflake = snowflakes[i];
-
-              if (i % 2 == 0) {
-                snowflake.style['color'] = _this.rgbToHex(0, 255, 0);
-              } else {
-                snowflake.style['color'] = _this.rgbToHex(255, 0, 0);
-              }
+            this.updateCurrentSimulationTime = function () {
+                _this.ctx.simulationTime = performance.now();
             }
 
-            _this.ctx.colorHasRun['2000'] = true;
-          }
-        } else {
-          _this.ctx.lightsSimulationStartMillis = currentMillis;
-          _this.ctx.colorHasRun['1000'] = false;
-          _this.ctx.colorHasRun['2000'] = false;
-        }
-      }
-
-      this.changeSnowflakesPositions = function (snowflakes) {
-        for (let i = 0; i < snowflakes.length; i++) {
-          let snowflake = snowflakes[i];
-          let top = snowflake.style['top'];
-          if (top) {
-            let topIntValue = parseFloat(top.split('px')[0], 10);
-            if (topIntValue < window.innerHeight) {
-              topIntValue += 2.5;
-              let originalLeft = snowflake['originalLeft'];
-              let cfv = snowflake['currentMotionFunctionValue'];
-              if (cfv > 6.28) {
-                cfv = 0;
-              } else {
-                cfv += 0.01;
-              }
-
-              let motionFunctionVal = Math.sin(cfv);
-              let newLeft = originalLeft + 50 * motionFunctionVal;
-              snowflake['currentMotionFunctionValue'] = cfv;
-              snowflake.style['left'] = newLeft + 'px';
-            } else {
-              topIntValue = -20;
-              snowflake['currentMotionFunctionValue'] = 6.28 * Math.random();
+            this.updateElapsed = function () {
+                let endTime = performance.now();
+                _this.ctx.elapsedMillis = endTime - _this.ctx.startTime;
             }
-            top = topIntValue + 'px';
-          } else {
-            top = '0px';
-          }
 
-          snowflake.style['top'] = top;
+            /**
+            * @param {String} HTML representing a single element
+            * @return {Element}
+            **/
+            this.htmlToElement = function (html) {
+                let template = document.createElement('template');
+                html = html.trim(); // Never return a text node of whitespace as the result
+                template.innerHTML = html;
+                return template.content.firstChild;
+            }
+
+            this.simulateChristmasTreeLights = function (snowflakes) {
+                let currentMillis = performance.now();
+                if (currentMillis - _this.ctx.lightsSimulationStartMillis < 1000) {
+                    if (_this.ctx.colorHasRun['1000'] === false) {
+                        for (let i = 0; i < snowflakes.length; i++) {
+                            let snowflake = snowflakes[i];
+                            if (i % 2 == 0) {
+                                snowflake.style['color'] = _this.rgbToHex(255, 0, 0);
+                            } else {
+                                snowflake.style['color'] = _this.rgbToHex(0, 255, 0);
+                            }
+                        }
+
+                        _this.ctx.colorHasRun['1000'] = true;
+                    }
+                } else if (currentMillis - _this.ctx.lightsSimulationStartMillis < 2000) {
+                    if (_this.ctx.colorHasRun['2000'] == false) {
+                        for (let i = 0; i < snowflakes.length; i++) {
+                            let snowflake = snowflakes[i];
+
+                            if (i % 2 == 0) {
+                                snowflake.style['color'] = _this.rgbToHex(0, 255, 0);
+                            } else {
+                                snowflake.style['color'] = _this.rgbToHex(255, 0, 0);
+                            }
+                        }
+
+                        _this.ctx.colorHasRun['2000'] = true;
+                    }
+                } else {
+                    _this.ctx.lightsSimulationStartMillis = currentMillis;
+                    _this.ctx.colorHasRun['1000'] = false;
+                    _this.ctx.colorHasRun['2000'] = false;
+                }
+            }
+
+            this.changeSnowflakesPositions = function (snowflakes) {
+                for (let i = 0; i < snowflakes.length; i++) {
+                    let snowflake = snowflakes[i];
+                    let top = snowflake.style['top'];
+                    if (top) {
+                        let topIntValue = parseFloat(top.split('px')[0], 10);
+                        if (topIntValue < window.innerHeight) {
+                            topIntValue += 2.5;
+                            let originalLeft = snowflake['originalLeft'];
+                            let cfv = snowflake['currentMotionFunctionValue'];
+                            if (cfv > 6.28) {
+                                cfv = 0;
+                            } else {
+                                cfv += 0.01;
+                            }
+
+                            let motionFunctionVal = Math.sin(cfv);
+                            let newLeft = originalLeft + 50 * motionFunctionVal;
+                            snowflake['currentMotionFunctionValue'] = cfv;
+                            snowflake.style['left'] = newLeft + 'px';
+                        } else {
+                            topIntValue = -20;
+                            snowflake['currentMotionFunctionValue'] = 6.28 * Math.random();
+                        }
+                        top = topIntValue + 'px';
+                    } else {
+                        top = '0px';
+                    }
+
+                    snowflake.style['top'] = top;
+                }
+            }
+
+            this.runSnow = function () {
+                _this.updateElapsed();
+
+                if (_this.ctx.simulationTime - _this.ctx.lastSimulationTime >= _this.ctx.frameDeltaMillis) {
+                    let snowflakes = document.getElementsByClassName('snowflake');
+
+                    _this.simulateChristmasTreeLights(snowflakes);
+                    _this.changeSnowflakesPositions(snowflakes);
+
+                    _this.ctx.lastSimulationTime = _this.ctx.simulationTime;
+                }
+
+                _this.updateCurrentSimulationTime();
+
+                _this.ctx.globalID = requestAnimationFrame(_this.runSnow);
+            }
+
+            this.getNextSnowflakeCode = function (i) {
+                return '&#x' + (_this.ctx.startSnowflakeCode + (i % 8)).toString(16) + ';';
+            }
+
+            this.addNewSnowflake = function (snowflakeCode, leftPosition) {
+                let sf = _this.htmlToElement('<div class="snowflake">' + snowflakeCode + '</div>');
+                sf.style['left'] = leftPosition + 'px';
+                sf['originalLeft'] = leftPosition;
+                sf['currentMotionFunctionValue'] = 6.28 * Math.random();
+                sf.style['top'] = (Math.random() * -window.innerHeight) + 'px';
+                _this.snowflakesContainer.appendChild(sf);
+            }
+
+            this.initSnowflakesStyle = function () {
+                let snowflakeStyle = document.createElement('style');
+                snowflakeStyle.innerHTML = ':root{--snowflake-color:#000000;}.snowflake{color:var(--snowflake-color);text-shadow:0 0 5px#000;position:fixed;top:0%;z-index:9999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;cursor:normal;}';
+                document.head.appendChild(snowflakeStyle);
+            }
+
+            this.generateSnowflakes = function () {
+                let step = window.innerWidth / _this.ctx.snowflakesCount;
+                for (let i = 0; i < _this.ctx.snowflakesCount; i++) {
+                    _this.addNewSnowflake(_this.getNextSnowflakeCode(i), (1 + i * step));
+                }
+            }
+
+            this.resetSimulationState = function () {
+                _this.ctx.colorHasRun['1000'] = false;
+                _this.ctx.colorHasRun['2000'] = false;
+            }
+
+            this.initSnowflakesParameters = function () {
+                _this.ctx.startSnowflakeCode = 10052;
+                _this.ctx.globalID = 0;
+                _this.ctx.startTime = 0;
+                _this.ctx.elapsedMillis = 0;
+                _this.ctx.frameDeltaMillis = 1000 / _this.ctx.fps;
+                _this.ctx.lastSimulationTime = 0;
+                _this.ctx.simulationTime = _this.ctx.frameDeltaMillis;
+                _this.ctx.lightsSimulationStartMillis = 0;
+                _this.ctx.colorHasRun = {};
+            }
+
+            this.initSnowflakes = function () {
+                _this.initSnowflakesParameters();
+                _this.initSnowflakesStyle();
+                _this.generateSnowflakes();
+                _this.resetSimulationState();
+            }
+
+            this.runSnowflakesAnimation = function () {
+                _this.ctx.globalID = requestAnimationFrame(_this.runSnow);
+            }
         }
-      }
 
-      this.runSnow = function () {
-        _this.updateElapsed();
-
-        if (_this.ctx.simulationTime - _this.ctx.lastSimulationTime >= _this.ctx.frameDeltaMillis) {
-          let snowflakes = document.getElementsByClassName('snowflake');
-
-          _this.simulateChristmasTreeLights(snowflakes);
-          _this.changeSnowflakesPositions(snowflakes);
-
-          _this.ctx.lastSimulationTime = _this.ctx.simulationTime;
-        }
-
-        _this.updateCurrentSimulationTime();
-
-        _this.ctx.globalID = requestAnimationFrame(_this.runSnow);
-      }
-
-      this.getNextSnowflakeCode = function (i) {
-        return '&#x' + (_this.ctx.startSnowflakeCode + (i % 8)).toString(16) + ';';
-      }
-
-      this.addNewSnowflake = function (container, snowflakeCode, leftPosition) {
-        let sf = _this.htmlToElement('<div class="snowflake">' + snowflakeCode + '</div>');
-        sf.style['left'] = leftPosition + 'px';
-        sf['originalLeft'] = leftPosition;
-        sf['currentMotionFunctionValue'] = 6.28 * Math.random();
-        sf.style['top'] = (Math.random() * -window.innerHeight) + 'px';
-        container.appendChild(sf);
-      }
-
-      this.initSnowflakesStyle = function () {
-        let snowflakeStyle = document.createElement('style');
-        snowflakeStyle.innerHTML = ':root{--snowflake-color:#000000;}.snowflake{color:var(--snowflake-color);text-shadow:0 0 5px#000;position:fixed;top:0%;z-index:9999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;cursor:normal;}';
-        document.head.appendChild(snowflakeStyle);
-      }
-
-      this.generateSnowflakes = function (snowflakesContainer) {
-        let step = window.innerWidth / _this.ctx.snowflakeCount;
-        for (let i = 0; i < _this.ctx.snowflakeCount; i++) {
-          _this.addNewSnowflake(snowflakesContainer, _this.getNextSnowflakeCode(i), (1 + i * step));
-        }
-      }
-
-      this.resetSimulationState = function () {
-        _this.ctx.colorHasRun['1000'] = false;
-        _this.ctx.colorHasRun['2000'] = false;
-      }
-
-      this.initSnowflakesParameters = function () {
-        _this.ctx.startSnowflakeCode = 10052;
-        _this.ctx.globalID = 0;
-        _this.ctx.startTime = 0;
-        _this.ctx.snowflakeCount = 25;
-        _this.ctx.elapsedMillis = 0;
-        _this.ctx.fps = 40;
-        _this.ctx.frameDeltaMillis = 1000 / _this.ctx.fps;
-        _this.ctx.lastSimulationTime = 0;
-        _this.ctx.simulationTime = _this.ctx.frameDeltaMillis;
-        _this.ctx.lightsSimulationStartMillis = 0;
-        _this.ctx.colorHasRun = {};
-      }
-
-      this.initSnowflakes = function (snowflakesContainer) {
-        _this.initSnowflakesParameters();
-        _this.initSnowflakesStyle();
-        _this.generateSnowflakes(snowflakesContainer);
-        _this.resetSimulationState();
-      }
-
-      this.runSnowflakesAnimation = function() {
-        _this.ctx.globalID = requestAnimationFrame(_this.runSnow);
-      }
-    }
-
-    const snowflakeEngine = new SnowflakesEngine();
-    snowflakeEngine.initSnowflakes(document.getElementsByClassName('snowflakes')[0]);
-    snowflakeEngine.runSnowflakesAnimation();
+        const snowflakeEngine = new SnowflakesEngine(document.getElementsByClassName('snowflakes')[0], 25, 40);
+        snowflakeEngine.initSnowflakes();
+        snowflakeEngine.runSnowflakesAnimation();
 //]]>
-  </script>
-</BODY>
+    </script>
+</body>
 
-</HTML>
+</html>
