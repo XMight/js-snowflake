@@ -85,7 +85,7 @@
                         snowflake['currentMotionFunctionValue'] = cfv;
 
                         let motionFunctionVal = Math.sin(cfv);
-                        let newLeft = originalLeft + 50 * motionFunctionVal;
+                        let newLeft = originalLeft + _this.ctx.horizontalSwing * motionFunctionVal;
                         snowflake.style['left'] = newLeft + 'px';
                     } else {
                         topIntValue = _this.ctx.topStartValue;
@@ -160,6 +160,7 @@
                 _this.ctx.motionFunctionMaxValue = 6.28;
                 _this.ctx.motionFunctionIncrement = 0.01;
                 _this.ctx.topStartValue = -20;
+                _this.ctx.horizontalSwing = 50;
             }
 
             this.initSnowflakes = function () {
