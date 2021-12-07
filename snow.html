@@ -11,13 +11,14 @@
     <div class="snowflakes" aria-hidden="true"></div>
     <script type='text/javascript'>
         //<![CDATA[
-        function SnowflakesEngine(snowflakesContainer, snowflakesCount, fps) {
+        function SnowflakesEngine(snowflakesContainer, snowflakesCount, fps, motionFunction) {
             let _this = this;
 
             this.ctx = {};
             this.ctx.snowflakesCount = snowflakesCount;
             this.ctx.fps = fps;
             this.ctx.snowflakesContainer = snowflakesContainer;
+            this.ctx.motionFunction = motionFunction;
 
             this.componentToHex = function (c) {
                 let hex = c.toString(16);
@@ -43,8 +44,8 @@
             **/
             this.htmlToElement = function (html) {
                 let template = document.createElement('template');
-                html = html.trim(); // Never return a text node of whitespace as the result
-                template.innerHTML = html;
+                template.innerHTML = html.trim(); // Never return a text node of whitespace as the result
+
                 return template.content.firstChild;
             }
 
@@ -79,24 +80,24 @@
                     if (topIntValue < window.innerHeight) {
                         topIntValue += _this.ctx.verticalPixelsStep;
                         let originalLeft = snowflake['originalLeft'];
-                        let cfv = snowflake['currentMotionFunctionValue'];
+                        let cfv = snowflake['currentMotionFunctionInputValue'];
 
-                        cfv = cfv > _this.ctx.motionFunctionMaxValue ? 0 : cfv + _this.ctx.motionFunctionIncrement;
-                        snowflake['currentMotionFunctionValue'] = cfv;
+                        cfv = cfv > _this.ctx.motionFunctionMaxInputValue ? 0 : cfv + _this.ctx.motionFunctionInputValueIncrement;
+                        snowflake['currentMotionFunctionInputValue'] = cfv;
 
-                        let motionFunctionVal = Math.sin(cfv);
-                        let newLeft = originalLeft + _this.ctx.horizontalSwing * motionFunctionVal;
+                        let motionFunctionCalculatedVal = this.ctx.motionFunction(cfv);
+                        let newLeft = originalLeft + _this.ctx.horizontalSwing * motionFunctionCalculatedVal;
                         snowflake.style['left'] = newLeft + 'px';
                     } else {
                         topIntValue = _this.ctx.topStartValue;
-                        snowflake['currentMotionFunctionValue'] = _this.ctx.motionFunctionMaxValue * Math.random();
+                        snowflake['currentMotionFunctionInputValue'] = _this.ctx.motionFunctionMaxInputValue * Math.random();
                     }
 
                     snowflake.style['top'] = topIntValue + 'px';
                 }
             }
 
-            this.runSnow = function () {
+            this.runInternal = function () {
                 _this.updateElapsed();
 
                 if (_this.ctx.simulationTime - _this.ctx.lastSimulationTime >= _this.ctx.frameDeltaMillis) {
@@ -110,7 +111,7 @@
 
                 _this.updateCurrentSimulationTime();
 
-                _this.ctx.requestAnimationFrameId = requestAnimationFrame(_this.runSnow);
+                _this.ctx.requestAnimationFrameId = requestAnimationFrame(_this.runInternal);
             }
 
             this.getNextSnowflakeCode = function (i) {
@@ -121,7 +122,7 @@
                 let sf = _this.htmlToElement('<div class="snowflake">' + snowflakeCode + '</div>');
                 sf.style['left'] = leftPosition + 'px';
                 sf['originalLeft'] = leftPosition;
-                sf['currentMotionFunctionValue'] = _this.ctx.motionFunctionMaxValue * Math.random();
+                sf['currentMotionFunctionInputValue'] = _this.ctx.motionFunctionMaxInputValue * Math.random();
                 sf.style['top'] = (Math.random() * -window.innerHeight) + 'px';
                 _this.ctx.snowflakesContainer.appendChild(sf);
             }
@@ -144,7 +145,7 @@
                 _this.ctx.colorHasRun[2000] = false;
             }
 
-            this.initSnowflakesParameters = function () {
+            this.initEngineParameters = function () {
                 _this.ctx.startSnowflakeCode = 10052;
                 _this.ctx.requestAnimationFrameId = 0;
                 _this.ctx.startTime = 0;
@@ -157,27 +158,27 @@
                 _this.ctx.colorGreen = _this.rgbToHex(0, 255, 0);
                 _this.ctx.colorRed = _this.rgbToHex(255, 0, 0);
                 _this.ctx.verticalPixelsStep = 2.5;
-                _this.ctx.motionFunctionMaxValue = 6.28;
-                _this.ctx.motionFunctionIncrement = 0.01;
+                _this.ctx.motionFunctionMaxInputValue = 6.28;
+                _this.ctx.motionFunctionInputValueIncrement = 0.01;
                 _this.ctx.topStartValue = -20;
                 _this.ctx.horizontalSwing = 50;
             }
 
-            this.initSnowflakes = function () {
-                _this.initSnowflakesParameters();
+            this.init = function () {
+                _this.initEngineParameters();
                 _this.initSnowflakesStyle();
                 _this.generateSnowflakes();
                 _this.resetSimulationState();
             }
 
-            this.runSnowflakesAnimation = function () {
-                _this.ctx.requestAnimationFrameId = requestAnimationFrame(_this.runSnow);
+            this.run = function () {
+                _this.ctx.requestAnimationFrameId = requestAnimationFrame(_this.runInternal);
             }
         }
 
-        const snowflakeEngine = new SnowflakesEngine(document.getElementsByClassName('snowflakes')[0], 25, 40);
-        snowflakeEngine.initSnowflakes();
-        snowflakeEngine.runSnowflakesAnimation();
+        const snowflakeEngine = new SnowflakesEngine(document.getElementsByClassName('snowflakes')[0], 25, 40, (value) => { return Math.sin(value); });
+        snowflakeEngine.init();
+        snowflakeEngine.run();
 //]]>
     </script>
 </body>
