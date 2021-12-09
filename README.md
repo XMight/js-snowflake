@@ -12,3 +12,5 @@ The CSSnowflakes were used only as a source of understanding animation, nothing 
 Currently the code is not separated from HTML for easier development, however in the future it will be.
 
 There are many parameters you can influence, and gradually I will make it easier to understand what they do and how to use them.
+
+To see the DEMO in action, please visit: https://xmight.github.io
