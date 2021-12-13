@@ -3,9 +3,10 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Snowflakes Engine DEMO</title>
+    <style type="text/css">body{background-color:black;}</style>
 </head>
 <body>
-    <div><button class="snowflakesToggle">Where is snow?</button></div>
+    <!-- <div><button class="snowflakesToggle">Where is snow?</button></div> -->
     <div class="snowflakes" aria-hidden="true"></div>
     <script type='text/javascript'>
         //<![CDATA[
@@ -119,6 +120,7 @@
             function addNewSnowflake(snowflakeCode, leftPosition) {
                 let sf = htmlToElement('<div class="snowflake">' + snowflakeCode + '</div>');
                 sf.style['left'] = leftPosition + 'px';
+                sf.style['font-size'] = _this.ctx.minSfSize + Math.random() * (_this.ctx.maxSfSize - _this.ctx.minSfSize) + 'px';
                 sf['originalLeft'] = leftPosition;
                 sf['currentMotionFunctionInputValue'] = _this.ctx.motionFunctionMaxInputValue * Math.random();
                 sf.style['top'] = (Math.random() * -window.innerHeight) + 'px';
@@ -160,6 +162,8 @@
                 _this.ctx.motionFunctionInputValueIncrement = 0.01;
                 _this.ctx.topStartValue = -20;
                 _this.ctx.horizontalSwing = 50;
+                _this.ctx.minSfSize = 10;
+                _this.ctx.maxSfSize = 25;
             }
 
             this.init = function () {
@@ -174,7 +178,7 @@
             }
         }
 
-        const snowflakeEngine = new SnowflakesEngine(document.getElementsByClassName('snowflakes')[0], 25, 40, (value) => { return Math.sin(value); });
+        const snowflakeEngine = new SnowflakesEngine(document.getElementsByClassName('snowflakes')[0], 30, 40, (value) => { return Math.sin(value); });
         snowflakeEngine.init();
         snowflakeEngine.run();
 //]]>
