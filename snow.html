@@ -1,10 +1,16 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html lang="en">
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Snowflakes Engine DEMO</title>
-    <style type="text/css">body{background-color:black;}</style>
+    <style type="text/css">
+        body {
+            background-color: black;
+        }
+    </style>
 </head>
+
 <body>
     <!-- <div><button class="snowflakesToggle">Where is snow?</button></div> -->
     <div class="snowflakes" aria-hidden="true"></div>
@@ -114,7 +120,7 @@
             }
 
             function getNextSnowflakeCode(i) {
-                return '&#x' + (_this.ctx.startSnowflakeCode + (i % 8)).toString(16) + ';';
+                return '&#x' + (_this.ctx.snowflakeCodes[i % _this.ctx.snowflakeCodes.length]).toString(16) + ';';
             }
 
             function addNewSnowflake(snowflakeCode, leftPosition) {
@@ -145,7 +151,26 @@
                 _this.ctx.colorHasRun[2000] = false;
             }
 
+            // from stackoverflow https://stackoverflow.com/questions/9038625/detect-if-device-is-ios
+            function isIOS() {
+                return [
+                    'iPad Simulator',
+                    'iPhone Simulator',
+                    'iPod Simulator',
+                    'iPad',
+                    'iPhone',
+                    'iPod'
+                ].includes(navigator.platform)
+                    // iPad on iOS 13 detection
+                    || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+            }
+
             function initEngineParameters() {
+                _this.ctx.snowflakeCodes = [10053, 10054, 10056, 10057, 10058, 10059];
+                if(!isIOS()) {
+                    _this.ctx.snowflakeCodes.push(10052);
+                    _this.ctx.snowflakeCodes.push(10055);
+                }
                 _this.ctx.startSnowflakeCode = 10052;
                 _this.ctx.requestAnimationFrameId = 0;
                 _this.ctx.startTime = 0;
@@ -184,4 +209,5 @@
 //]]>
     </script>
 </body>
+
 </html>
