@@ -16,7 +16,7 @@
     <div class="snowflakes" aria-hidden="true"></div>
     <script type='text/javascript'>
         //<![CDATA[
-        function SnowflakesEngine(snowflakesContainer, snowflakesCount, fps, motionFunction) {
+        function SnowflakesEngine(snowflakesContainer, snowflakesCount, fps, motionFunction, enableVisibilityToggle) {
             let _this = this;
 
             this.ctx = {};
@@ -24,6 +24,7 @@
             this.ctx.fps = fps;
             this.ctx.snowflakesContainer = snowflakesContainer;
             this.ctx.motionFunction = motionFunction;
+            this.ctx.enableVisibilityToggle = enableVisibilityToggle;
 
             function componentToHex(c) {
                 let hex = c.toString(16);
@@ -96,6 +97,7 @@
                     } else {
                         topIntValue = _this.ctx.topStartValue;
                         snowflake['currentMotionFunctionInputValue'] = _this.ctx.motionFunctionMaxInputValue * Math.random();
+                        snowflake.style['visibility'] = 'visible';
                     }
 
                     snowflake.style['top'] = topIntValue + 'px';
@@ -165,9 +167,17 @@
                     || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
             }
 
+            function enableSnowflakesVisibilityToggle() {
+                document.body.addEventListener('click', (event) => {
+                    if (event && event.target && event.target.classList.contains('snowflake')) {
+                        event.target.style['visibility'] = 'hidden';
+                    }
+                }, true);
+            }
+
             function initEngineParameters() {
                 _this.ctx.snowflakeCodes = [10053, 10054, 10056, 10057, 10058, 10059];
-                if(!isIOS()) {
+                if (!isIOS()) {
                     _this.ctx.snowflakeCodes.push(10052);
                     _this.ctx.snowflakeCodes.push(10055);
                 }
@@ -185,10 +195,14 @@
                 _this.ctx.verticalPixelsStep = 2.5;
                 _this.ctx.motionFunctionMaxInputValue = 6.28;
                 _this.ctx.motionFunctionInputValueIncrement = 0.01;
-                _this.ctx.topStartValue = -20;
+                _this.ctx.topStartValue = -40;
                 _this.ctx.horizontalSwing = 50;
                 _this.ctx.minSfSize = 10;
                 _this.ctx.maxSfSize = 25;
+
+                if (_this.ctx.enableVisibilityToggle) {
+                    enableSnowflakesVisibilityToggle();
+                }
             }
 
             this.init = function () {
@@ -203,7 +217,14 @@
             }
         }
 
-        const snowflakeEngine = new SnowflakesEngine(document.getElementsByClassName('snowflakes')[0], 30, 40, (value) => { return Math.sin(value); });
+        const snowflakeEngine = new SnowflakesEngine(
+            document.getElementsByClassName('snowflakes')[0],   // Container where snowflakes will be places
+            30, // Snowflakes count
+            40, // FPS
+            (value) => { return Math.sin(value); }, // Motion function (any periodic should do)
+            true    // enable snowflake disappearing on click event
+            );
+
         snowflakeEngine.init();
         snowflakeEngine.run();
 //]]>
